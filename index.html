@@ -4,160 +4,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Primer - Bio Research Hub</title>
-    <!-- Tailwind CSS (UI Framework) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- PDF Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #f1f5f9; 
-        }
-
-        /* 카드 커스텀 스타일 */
-        .paper-card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s ease;
-            border: 1px solid #e2e8f0;
-            min-height: 420px;
-        }
-
-        .paper-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-
-        /* 우선순위 강조 (PowerChek) */
-        .priority-card { border-top: 8px solid #ef4444; background-color: #fffafb; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .paper-card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; transition: all 0.3s ease; min-height: 420px; }
+        .paper-card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .priority-card { border-top: 8px solid #ef4444; background: #fffcfc; }
         .normal-card { border-top: 8px solid #3b82f6; }
-
-        /* 초록 미리보기: 단어 단위 절삭 */
-        .abstract-preview {
-            display: -webkit-box;
-            -webkit-line-clamp: 6;
-            -webkit-box-vertical: vertical;
-            overflow: hidden;
-            font-size: 0.875rem;
-            line-height: 1.6;
-            color: #475569;
-            font-style: italic;
-        }
-
-        /* 로더 애니메이션 */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3b82f6;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-
+        .title-text { font-size: 1.2rem; font-weight: 800; color: #1e293b; line-height: 1.4; margin-bottom: 12px; }
+        .author-info { font-size: 0.95rem; font-weight: 700; color: #334155; margin-bottom: 4px; }
+        .aff-info { font-size: 0.8rem; color: #64748b; line-height: 1.5; margin-bottom: 12px; }
+        .journal-info { font-size: 0.85rem; color: #2563eb; font-weight: 700; margin-bottom: 4px; }
+        .date-info { font-size: 0.8rem; color: #94a3b8; margin-bottom: 15px; }
+        .abstract-box { background: #f1f5f9; border-radius: 8px; padding: 15px; font-size: 0.9rem; color: #475569; line-height: 1.6; margin-top: auto; border: 1px solid #e2e8f0; }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; margin-right: 5px; margin-bottom: 10px; }
+        .type-badge { background: #eef2f7; color: #475569; border: 1px solid #cbd5e1; }
+        .priority-badge { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+        .pmid-text { font-family: monospace; font-size: 0.75rem; color: #94a3b8; float: right; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* PDF 출력용 숨김 영역 */
-        #pdf-container { display: none; }
-        @media print { .no-print { display: none !important; } }
+        #pdf-export-area { display: none; }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
     <div class="max-w-7xl mx-auto">
-        <!-- 상단 헤더 -->
         <header class="mb-12 text-center">
-            <h1 class="text-6xl font-black text-slate-900 mb-2 tracking-tighter italic">Primer</h1>
-            <p class="text-slate-500 font-medium tracking-wide uppercase text-xs">Molecular Diagnostics Research Intelligence</p>
+            <h1 class="text-6xl font-black text-slate-900 mb-2 italic">Primer</h1>
+            <p class="text-slate-500 font-medium">Molecular Diagnostics Research Hub</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <!-- 사이드바: 설정 -->
-            <aside class="lg:col-span-1 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-fit sticky top-10 no-print">
-                <h2 class="text-sm font-black text-slate-800 mb-6 uppercase tracking-widest">📋 검색 설정</h2>
-                
+            <!-- Sidebar (Python Sidebar 복제) -->
+            <aside class="lg:col-span-1 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-fit sticky top-10">
+                <h2 class="text-sm font-bold text-slate-800 mb-6 uppercase tracking-widest">📋 리서치 설정</h2>
                 <div class="space-y-5">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase">PubMed Email</label>
-                        <input type="email" id="email" value="scholar@lab.ac.kr" class="w-full mt-1 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="email" id="email" value="your@lab.ac.kr" class="w-full mt-1 p-2.5 border rounded-xl text-sm outline-none">
                     </div>
-                    
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-[10px] font-bold text-slate-400 uppercase">시작일</label>
-                            <input type="date" id="startDate" class="w-full mt-1 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[10px]">
+                            <input type="date" id="startDate" class="w-full mt-1 p-2 border rounded-xl text-[10px]">
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-400 uppercase">종료일</label>
-                            <input type="date" id="endDate" class="w-full mt-1 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[10px]">
+                            <input type="date" id="endDate" class="w-full mt-1 p-2 border rounded-xl text-[10px]">
                         </div>
                     </div>
-
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase">연구 분야</label>
-                        <input type="text" id="baseDomain" value="Molecular Diagnostics" class="w-full mt-1 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase">기본 도메인</label>
+                        <input type="text" id="baseDomain" value="Molecular Diagnostics" class="w-full mt-1 p-2 border rounded-xl text-sm">
                     </div>
-
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase">관심 키워드</label>
-                        <textarea id="interests" class="w-full mt-1 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm h-28">PCR, NGS, Liquid Biopsy</textarea>
+                        <textarea id="interests" class="w-full mt-1 p-2 border rounded-xl text-sm h-24">PCR, NGS, Liquid Biopsy</textarea>
                     </div>
-
                     <div>
-                        <label class="block text-[10px] font-bold text-red-400 uppercase">우선순위 키워드</label>
-                        <input type="text" id="priorityK" value="PowerChek" class="w-full mt-1 p-2.5 border border-red-100 bg-red-50 text-red-700 font-bold rounded-xl text-sm">
+                        <label class="block text-[10px] font-bold text-red-400 uppercase">최우선 강조</label>
+                        <input type="text" id="priorityK" value="PowerChek" class="w-full mt-1 p-2 border border-red-100 bg-red-50 text-red-700 font-bold rounded-xl text-sm">
                     </div>
-
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase">결과 개수: <span id="limitVal" class="text-blue-600">20</span></label>
-                        <input type="range" id="limit" min="5" max="50" value="20" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer mt-2" oninput="document.getElementById('limitVal').innerText=this.value">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase">조회수: <span id="limitVal">20</span></label>
+                        <input type="range" id="limit" min="5" max="50" value="20" class="w-full mt-2" oninput="document.getElementById('limitVal').innerText=this.value">
                     </div>
-
-                    <button onclick="startResearch()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl transition-all shadow-xl active:scale-95">리포트 생성</button>
+                    <button onclick="startSearch()" class="w-full bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-black transition-all">🚀 리포트 생성</button>
                 </div>
             </aside>
 
-            <!-- 메인 영역 -->
+            <!-- Main Content -->
             <main class="lg:col-span-3">
-                <div id="toolbar" class="flex justify-between items-center mb-8 hidden no-print">
-                    <div class="flex gap-2">
-                        <button onclick="toggleAll(true)" class="text-xs font-bold bg-white border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50">전체 선택</button>
-                        <button onclick="toggleAll(false)" class="text-xs font-bold bg-white border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50">해제</button>
+                <div id="metricArea" class="grid grid-cols-3 gap-4 mb-8 hidden">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 text-center">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">총 검색 결과</p>
+                        <p id="statTotal" class="text-2xl font-black text-slate-800">0</p>
                     </div>
-                    <button onclick="exportToPDF()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2 rounded-xl text-sm shadow-lg flex items-center transition-all">
-                        📄 PDF 리포트 저장
-                    </button>
+                    <div class="bg-white p-4 rounded-xl border border-t-8 border-t-red-500 border-slate-200 text-center">
+                        <p class="text-[10px] font-bold text-red-400 uppercase">강조 논문</p>
+                        <p id="statPriority" class="text-2xl font-black text-red-600">0</p>
+                    </div>
+                    <button onclick="exportSelectedToPDF()" class="bg-blue-600 text-white font-bold rounded-xl shadow-md hover:bg-blue-700">📄 PDF 저장</button>
                 </div>
 
-                <div id="loading" class="hidden flex flex-col justify-center items-center py-32">
+                <div id="loading" class="hidden flex flex-col justify-center items-center py-20">
                     <div class="loader"></div>
-                    <span class="mt-6 font-bold text-slate-400 animate-pulse uppercase tracking-[0.2em] text-[10px]">Fetching PubMed Data...</span>
+                    <span class="mt-4 font-bold text-slate-400 animate-pulse">데이터를 수집 중입니다...</span>
                 </div>
 
-                <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- 논문 카드가 이곳에 생성됩니다 -->
-                </div>
+                <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
             </main>
         </div>
     </div>
 
-    <!-- PDF 템플릿 (평소엔 숨김) -->
-    <div id="pdf-container"></div>
+    <!-- PDF용 숨겨진 영역 -->
+    <div id="pdf-export-area"></div>
 
     <script>
         // 초기 날짜 설정
         const now = new Date();
         document.getElementById('endDate').value = now.toISOString().split('T')[0];
-        const lastMonth = new Date(); lastMonth.setMonth(now.getMonth() - 1);
-        document.getElementById('startDate').value = lastMonth.toISOString().split('T')[0];
+        const last = new Date(); last.setMonth(now.getMonth() - 1);
+        document.getElementById('startDate').value = last.toISOString().split('T')[0];
 
-        let currentPapers = [];
+        let paperList = [];
 
-        async function startResearch() {
+        async function startSearch() {
             const email = document.getElementById('email').value;
             const startDate = document.getElementById('startDate').value.replace(/-/g, '/');
             const endDate = document.getElementById('endDate').value.replace(/-/g, '/');
@@ -166,27 +120,27 @@
             const prio = document.getElementById('priorityK').value.toLowerCase();
             const limit = document.getElementById('limit').value;
 
-            if(!email.includes('@')) return alert("유효한 이메일을 입력해 주세요.");
+            if(!email.includes('@')) return alert("유효한 이메일을 입력하세요.");
 
             const grid = document.getElementById('resultsGrid');
             const loading = document.getElementById('loading');
-            const toolbar = document.getElementById('toolbar');
+            const metrics = document.getElementById('metricArea');
 
             grid.innerHTML = "";
             loading.classList.remove('hidden');
-            toolbar.classList.add('hidden');
+            metrics.classList.add('hidden');
 
             try {
                 const query = `("${domain}") AND (${kws.split(',').join(' OR ')})`;
-                const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&retmax=${limit}&mindate=${startDate}&maxdate=${endDate}&datetype=pdat&retmode=json&email=${email}`;
+                const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&retmax=${limit}&mindate=${startDate}&maxdate=${endDate}&datetype=pdat&retmode=json&email=${email}`;
                 
-                const searchRes = await fetch(searchUrl);
-                const data = await searchRes.json();
-                const ids = data.esearchresult.idlist;
+                const res = await fetch(url);
+                const searchData = await res.json();
+                const ids = searchData.esearchresult.idlist;
 
                 if (!ids || ids.length === 0) {
                     loading.classList.add('hidden');
-                    return alert("조건에 맞는 검색 결과가 없습니다.");
+                    return alert("결과가 없습니다.");
                 }
 
                 const fetchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${ids.join(',')}&rettype=abstract&retmode=xml`;
@@ -196,98 +150,74 @@
                 const xmlDoc = parser.parseFromString(xmlText, "text/xml");
                 const articles = xmlDoc.getElementsByTagName("PubmedArticle");
 
-                currentPapers = [];
+                paperList = [];
+                let prioCount = 0;
+
                 for (let art of articles) {
                     const title = art.querySelector("ArticleTitle")?.textContent || "No Title";
                     const pmid = art.querySelector("PMID")?.textContent || "N/A";
                     const abstract = Array.from(art.querySelectorAll("AbstractText")).map(t => t.textContent).join(" ");
-                    
-                    const author = art.querySelector("Author");
-                    const authorName = author ? `${author.querySelector("LastName")?.textContent || ""} ${author.querySelector("ForeName")?.textContent || ""}` : "Unknown";
-                    const affiliation = author?.querySelector("Affiliation")?.textContent || "소속 정보 없음";
+                    const authorInfo = art.querySelector("Author");
+                    const author = authorInfo ? `${authorInfo.querySelector("LastName")?.textContent} ${authorInfo.querySelector("ForeName")?.textContent}` : "Unknown";
+                    const aff = authorInfo?.querySelector("Affiliation")?.textContent || "N/A";
                     const journal = art.querySelector("Title")?.textContent || "Unknown Journal";
-                    const pubYear = art.querySelector("PubDate Year")?.textContent || art.querySelector("PubDate MedlineDate")?.textContent || "";
-                    const type = art.querySelector("PublicationType")?.textContent || "Journal Article";
+                    const pubDate = art.querySelector("PubDate Year")?.textContent || "";
+                    const type = art.querySelector("PublicationType")?.textContent || "Article";
                     
-                    const isPriority = (title + abstract).toLowerCase().includes(prio);
+                    const isPrio = (title + abstract).toLowerCase().includes(prio);
+                    if(isPrio) prioCount++;
 
-                    currentPapers.push({ pmid, title, authorName, affiliation, journal, pubYear, type, abstract, isPriority, link: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/` });
+                    paperList.push({ pmid, title, author, aff, journal, pubDate, type, abstract, isPrio, link: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/` });
                 }
 
-                currentPapers.sort((a, b) => b.isPriority - a.isPriority);
+                paperList.sort((a, b) => b.isPrio - a.isPrio);
 
-                currentPapers.forEach(p => {
-                    const cardClass = p.isPriority ? "priority-card" : "normal-card";
-                    const badge = p.isPriority ? `<span class="bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-black mr-2">PRIORITY</span>` : "";
-                    
-                    const html = `
+                document.getElementById('statTotal').innerText = paperList.length;
+                document.getElementById('statPriority').innerText = prioCount;
+                metrics.classList.remove('hidden');
+
+                paperList.forEach(p => {
+                    const cardClass = p.isPrio ? "priority-card" : "normal-card";
+                    const pBadge = p.isPrio ? `<span class="badge priority-badge">★ ${prio.toUpperCase()}</span>` : "";
+                    grid.innerHTML += `
                         <div class="paper-card ${cardClass}">
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="flex items-center">
-                                    <input type="checkbox" value="${p.pmid}" class="paper-check w-5 h-5 mr-3 accent-blue-600 cursor-pointer">
-                                    ${badge}
-                                    <span class="bg-slate-100 text-slate-500 text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-tighter">${p.type}</span>
-                                </div>
-                                <span class="text-[9px] text-slate-300 font-mono">PMID: ${p.pmid}</span>
+                            <div class="flex justify-between items-start">
+                                <div><input type="checkbox" value="${p.pmid}" class="mr-2 pdf-check"> ${pBadge}<span class="badge type-badge">${p.type}</span></div>
+                                <span class="pmid-text">PMID: ${p.pmid}</span>
                             </div>
-                            <h3 class="text-lg font-extrabold text-slate-800 leading-tight mb-4">${p.title}</h3>
-                            <div class="text-sm font-bold text-slate-600 mb-1">👤 ${p.authorName}</div>
-                            <div class="text-[11px] text-slate-400 mb-4 line-clamp-1 italic">📍 ${p.affiliation}</div>
-                            <div class="text-xs font-bold text-blue-600 mb-1">📖 ${p.journal}</div>
-                            <div class="text-[10px] text-slate-400 mb-6">📅 Published: ${p.pubYear}</div>
-                            <div class="abstract-preview border-t pt-4">
-                                ${p.abstract || "초록 데이터가 없습니다."}
-                            </div>
-                            <div class="mt-auto pt-6 flex justify-end">
-                                <a href="${p.link}" target="_blank" class="text-[10px] font-black text-slate-400 hover:text-blue-600 uppercase tracking-widest transition-colors">원문 확인 →</a>
-                            </div>
+                            <div class="title-text">${p.title}</div>
+                            <div class="author-info">👤 ${p.author}</div>
+                            <div class="aff-info">📍 ${p.aff}</div>
+                            <div class="journal-info">📖 ${p.journal}</div>
+                            <div class="date-info">📅 ${p.pubDate}</div>
+                            <div class="abstract-box"><b>[Abstract]</b><br>${p.abstract.substring(0, 550)}...</div>
+                            <div class="text-right mt-4"><a href="${p.link}" target="_blank" class="text-blue-600 font-bold text-xs">View on PubMed →</a></div>
                         </div>
                     `;
-                    grid.innerHTML += html;
                 });
-                toolbar.classList.remove('hidden');
-            } catch (err) {
-                alert("데이터를 가져오는 중 오류가 발생했습니다.");
-                console.error(err);
+            } catch (e) {
+                alert("오류 발생");
             } finally {
                 loading.classList.add('hidden');
             }
         }
 
-        function toggleAll(val) { document.querySelectorAll('.paper-check').forEach(c => c.checked = val); }
-
-        async function exportToPDF() {
-            const selected = Array.from(document.querySelectorAll('.paper-check:checked')).map(c => c.value);
-            if(selected.length === 0) return alert("내보낼 논문을 선택해 주세요.");
-            
-            const container = document.getElementById('pdf-container');
-            container.innerHTML = `
-                <div style="text-align:center; padding-bottom: 20px; border-bottom: 2px solid #000; margin-bottom: 30px;">
-                    <h1 style="font-size: 32px; font-weight: 800;">Primer Research Report</h1>
-                    <p style="font-size: 12px; color: #666;">Generated on: ${new Date().toLocaleDateString()}</p>
-                </div>
-            `;
-            
+        async function exportSelectedToPDF() {
+            const selected = Array.from(document.querySelectorAll('.pdf-check:checked')).map(c => c.value);
+            if(selected.length === 0) return alert("논문을 선택하세요.");
+            const area = document.getElementById('pdf-export-area');
+            area.innerHTML = `<h1 style="text-align:center;">Primer Research Report</h1>`;
             selected.forEach(id => {
-                const p = currentPapers.find(x => x.pmid === id);
-                container.innerHTML += `
-                    <div style="margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; page-break-inside: avoid;">
-                        <p style="font-size: 10px; color: #3b82f6; font-weight: bold; margin-bottom: 5px;">${p.journal} (${p.pubYear})</p>
-                        <h2 style="font-size: 18px; margin-bottom: 10px; font-weight: 800;">${p.title}</h2>
-                        <p style="font-size: 11px; margin-bottom: 5px;"><b>Author:</b> ${p.authorName} | <b>Affiliation:</b> ${p.affiliation}</p>
-                        <p style="font-size: 10px; line-height: 1.5; color: #444; background: #f9f9f9; padding: 10px; border-radius: 5px;">${p.abstract}</p>
-                    </div>`;
+                const p = paperList.find(x => x.pmid === id);
+                area.innerHTML += `<div style="margin-bottom:30px; border-bottom:1px solid #eee; padding-bottom:20px;">
+                    <h3>${p.title}</h3>
+                    <p><b>Author:</b> ${p.author} | <b>Journal:</b> ${p.journal}</p>
+                    <p>${p.abstract}</p>
+                </div>`;
             });
-            
-            container.style.display = 'block';
-            await html2pdf().set({ 
-                margin: 10, 
-                filename: 'Primer_Report.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            }).from(container).save();
-            container.style.display = 'none';
+            area.style.display = 'block';
+            await html2pdf().set({ margin: 10, filename: 'Primer_Report.pdf' }).from(area).save();
+            area.style.display = 'none';
         }
     </script>
 </body>
