@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Primer - Bio Research Hub</title>
+    <!-- Tailwind CSS & PDF Library -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- 외부 스타일시트 연결 -->
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="mb-10 text-center">
+            <h1 class="text-6xl font-extrabold text-slate-900 mb-2 tracking-tighter italic">Primer</h1>
+            <p class="text-slate-500 font-medium">Molecular Diagnostics Research Intelligence Hub</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Sidebar (Search Config) -->
+            <aside class="lg:col-span-1 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-fit sticky top-8 no-print">
+                <h2 class="text-lg font-bold mb-6 text-slate-800">📋 검색 설정</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="label-title">PubMed Email</label>
+                        <input type="email" id="email" value="scholar@lab.ac.kr" class="input-field">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="label-title">시작일</label>
+                            <input type="date" id="startDate" class="input-field text-xs">
+                        </div>
+                        <div>
+                            <label class="label-title">종료일</label>
+                            <input type="date" id="endDate" class="input-field text-xs">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="label-title">분야</label>
+                        <input type="text" id="baseDomain" value="Molecular Diagnostics" class="input-field">
+                    </div>
+                    <div>
+                        <label class="label-title">관심 키워드</label>
+                        <textarea id="interests" class="input-field h-24">PCR, NGS, Liquid Biopsy</textarea>
+                    </div>
+                    <div>
+                        <label class="label-title text-red-400">우선 키워드</label>
+                        <input type="text" id="priorityK" value="PowerChek" class="input-field bg-red-50 text-red-700 font-bold border-red-100">
+                    </div>
+                    <div>
+                        <label class="label-title">결과 수: <span id="limitVal" class="text-blue-600">20</span></label>
+                        <input type="range" id="limit" min="5" max="50" value="20" class="w-full mt-2" oninput="document.getElementById('limitVal').innerText=this.value">
+                    </div>
+                    <button onclick="startResearch()" class="btn-primary w-full py-4 mt-2">리포트 생성</button>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="lg:col-span-3">
+                <div id="toolbar" class="flex justify-between items-center mb-6 hidden no-print">
+                    <div class="space-x-2">
+                        <button onclick="toggleAll(true)" class="btn-outline px-4 py-2">전체 선택</button>
+                        <button onclick="toggleAll(false)" class="btn-outline px-4 py-2">해제</button>
+                    </div>
+                    <button onclick="exportToPDF()" class="btn-accent px-6 py-2">📄 선택 논문 PDF 저장</button>
+                </div>
+
+                <div id="loading" class="hidden flex flex-col justify-center items-center py-24">
+                    <div class="loader"></div>
+                    <span class="mt-6 font-bold text-slate-400 animate-pulse uppercase tracking-widest text-xs">Fetching PubMed Data...</span>
+                </div>
+
+                <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- PDF Template -->
+    <div id="pdf-container" class="hidden"></div>
+
+    <script>
+        // 날짜 기본값 설정
+        const now = new Date();
+        document.getElementById('endDate').value = now.toISOString().split('T')[0];
+        const last = new Date(); last.setMonth(now.getMonth() - 1);
+        document.getElementById('startDate').value = last.toISOString().split('T')[0];
+
+        let currentPapers = [];
+
+        async function startResearch() {
+            const email = document.getElementById('email').value;
+            const sDate = document.getElementById('startDate').value.replace(/-/g, '/');
+            const eDate = document.getElementById('endDate').value.replace(/-/g, '/');
+            const domain = document.getElementById('baseDomain').value;
+            const kws = document.getElementById('interests').value;
+            const prio = document.getElementById('priorityK').value.toLowerCase();
+            const limit = document.getElementById('limit').value;
+
+            if(!email.includes('@')) return alert("유효한 이메일을 입력하세요.");
+
+            const grid = document.getElementById('resultsGrid');
+            const loading = document.getElementById('loading');
+            const toolbar = document.getElementById('toolbar');
+
+            grid.innerHTML = "";
+            loading.classList.remove('hidden');
+            toolbar.classList.add('hidden');
+
+            try {
+                const query = `("${domain}") AND (${kws.split(',').join(' OR ')})`;
+                const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&retmax=${limit}&mindate=${sDate}&maxdate=${eDate}&datetype=pdat&retmode=json&email=${email}`;
+                
+                const response = await fetch(searchUrl);
+                const data = await response.json();
+                const ids = data.esearchresult.idlist;
+
+                if (!ids || ids.length === 0) {
+                    loading.classList.add('hidden');
+                    return alert("검색 결과가 없습니다.");
+                }
+
+                const fetchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${ids.join(',')}&rettype=abstract&retmode=xml`;
+                const fetchRes = await fetch(fetchUrl);
+                const xmlText = await fetchRes.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+                const articles = xmlDoc.getElementsByTagName("PubmedArticle");
+
+                currentPapers = [];
+                for (let art of articles) {
+                    const title = art.querySelector("ArticleTitle")?.textContent || "No Title";
+                    const pmid = art.querySelector("PMID")?.textContent || "N/A";
+                    const abstract = Array.from(art.querySelectorAll("AbstractText")).map(t => t.textContent).join(" ");
+                    const author = art.querySelector("Author");
+                    const authorName = author ? `${author.querySelector("LastName")?.textContent || ""} ${author.querySelector("ForeName")?.textContent || ""}` : "Unknown";
+                    const affiliation = author?.querySelector("Affiliation")?.textContent || "소속 정보 없음";
+                    const journal = art.querySelector("Title")?.textContent || "Unknown Journal";
+                    const pubYear = art.querySelector("PubDate Year")?.textContent || art.querySelector("PubDate MedlineDate")?.textContent || "";
+                    const type = art.querySelector("PublicationType")?.textContent || "Journal Article";
+                    const isPriority = (title + abstract).toLowerCase().includes(prio);
+
+                    currentPapers.push({ pmid, title, authorName, affiliation, journal, pubYear, type, abstract, isPriority, link: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/` });
+                }
+
+                currentPapers.sort((a, b) => b.isPr
