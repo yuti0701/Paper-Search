@@ -4,19 +4,141 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Primer - Bio Research Hub</title>
+    <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="static/style.css">
+    <style>
+        /* Python Streamlit 스타일을 HTML 내부에 완벽히 이식 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc; 
+        }
+
+        /* 입력창 및 레이블 스타일 */
+        .label-text {
+            display: block;
+            font-size: 10px;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+            background-color: #ffffff;
+        }
+
+        .input-field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        /* 버튼 스타일 */
+        .btn-primary {
+            background-color: #0f172a;
+            color: white;
+            font-weight: 700;
+            border-radius: 16px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background-color: #000000;
+            transform: scale(1.01);
+        }
+
+        .btn-secondary {
+            background-color: #2563eb;
+            color: white;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        /* 논문 카드 스타일 */
+        .paper-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            min-height: 440px;
+        }
+
+        .paper-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 우선순위 강조 컬러 */
+        .priority-card { border-top: 8px solid #ef4444; background-color: #fffcfc; }
+        .normal-card { border-top: 8px solid #3b82f6; }
+
+        .title-text { 
+            font-size: 1.15rem; 
+            font-weight: 800; 
+            color: #1e293b; 
+            line-height: 1.4; 
+            margin-bottom: 12px; 
+        }
+
+        .author-info { font-size: 0.9rem; font-weight: 700; color: #334155; margin-bottom: 4px; }
+        .aff-info { font-size: 0.8rem; color: #64748b; line-height: 1.4; margin-bottom: 12px; }
+        .journal-info { font-size: 0.85rem; color: #2563eb; font-weight: 700; margin-bottom: 10px; }
+
+        /* 초록 박스 */
+        .abstract-box {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 0.88rem;
+            color: #475569;
+            line-height: 1.6;
+            margin-top: auto;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-vertical: vertical;
+        }
+
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; margin-right: 5px; }
+        .priority-badge { background: #fee2e2; color: #dc2626; }
+
+        /* 로딩 스피너 */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
 <body class="p-4 md:p-10">
 
     <div class="max-w-7xl mx-auto">
         <header class="mb-10 text-center">
             <h1 class="text-5xl font-black text-slate-900 mb-2 italic">🧪 Primer</h1>
-            <p class="text-slate-500 font-medium">Molecular Diagnostics Research Intelligence Hub</p>
+            <p class="text-slate-500 font-medium tracking-tight">Molecular Diagnostics Research Intelligence Hub</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <!-- Sidebar: Python 코드의 Sidebar와 동일하게 구성 -->
+            <!-- Sidebar -->
             <aside class="lg:col-span-1 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-fit sticky top-10">
                 <h2 class="text-sm font-bold text-slate-800 mb-6 uppercase tracking-widest border-b pb-2">📋 검색 설정</h2>
                 <div class="space-y-5">
@@ -27,11 +149,11 @@
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="label-text">시작일</label>
-                            <input type="date" id="start_d" class="input-field text-[10px]">
+                            <input type="date" id="start_d" class="input-field">
                         </div>
                         <div>
                             <label class="label-text">종료일</label>
-                            <input type="date" id="end_d" class="input-field text-[10px]">
+                            <input type="date" id="end_d" class="input-field">
                         </div>
                     </div>
                     <div>
@@ -50,15 +172,13 @@
                         <label class="label-text">조회 수: <span id="limitVal">20</span></label>
                         <input type="range" id="limit" min="5" max="50" value="20" class="w-full mt-2" oninput="document.getElementById('limitVal').innerText=this.value">
                     </div>
-                    <button onclick="startResearch()" class="btn-primary w-full py-4 shadow-xl">🚀 리포트 생성</button>
+                    <button onclick="startResearch()" class="btn-primary w-full py-4 shadow-lg">🚀 리포트 생성</button>
                 </div>
 
-                <!-- 이메일 발송 섹션 (Python UI 이식) -->
+                <!-- Email Section -->
                 <div id="emailSection" class="hidden mt-10 pt-6 border-t border-slate-200">
                     <h2 class="text-sm font-bold text-slate-800 mb-4 uppercase tracking-widest">✉️ 리포트 발송</h2>
                     <div class="space-y-4">
-                        <input type="email" id="s_user" placeholder="나의 Gmail" class="input-field">
-                        <p class="text-[9px] text-slate-400">⚠️ 정적 페이지에서는 텍스트 복사 및 메일 앱 연결을 지원합니다.</p>
                         <input type="email" id="r_email" placeholder="수신자(교수님) 이메일" class="input-field">
                         <button onclick="sendViaMailApp()" class="btn-secondary w-full py-3">📧 이메일 앱으로 발송</button>
                         <button onclick="copyToClipboard()" class="bg-slate-100 text-slate-700 w-full py-2 rounded-xl text-xs font-bold hover:bg-slate-200">📋 리포트 텍스트 복사</button>
@@ -74,18 +194,18 @@
                 </div>
 
                 <div id="infoMessage" class="mb-6 p-4 bg-blue-50 text-blue-700 rounded-xl text-sm font-medium border border-blue-100">
-                    💡 리포트 생성 버튼을 눌러 연구 자료를 불러오세요.
+                    💡 <b>리포트 생성</b> 버튼을 눌러 연구 자료 탐색을 시작하세요.
                 </div>
 
                 <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- 논문 카드가 이곳에 생성됩니다 -->
+                    <!-- Cards dynamically injected -->
                 </div>
             </main>
         </div>
     </div>
 
     <script>
-        // 날짜 초기화
+        // 날짜 초기값 설정 (오늘 및 한달 전)
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('end_d').value = today;
         const lastMonth = new Date(); lastMonth.setMonth(lastMonth.getMonth() - 1);
@@ -124,7 +244,7 @@
 
                 if (!ids || ids.length === 0) {
                     loader.classList.add('hidden');
-                    return alert("결과가 없습니다.");
+                    return alert("조건에 맞는 검색 결과가 없습니다.");
                 }
 
                 const fetchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${ids.join(',')}&rettype=abstract&retmode=xml`;
@@ -156,23 +276,24 @@
                     grid.innerHTML += `
                         <div class="paper-card ${cardClass}">
                             <div class="flex justify-between items-start mb-4">
-                                <div><input type="checkbox" value="${p.pmid}" class="paper-check w-5 h-5 mr-2"> ${badge}</div>
+                                <div><input type="checkbox" value="${p.pmid}" class="paper-check w-5 h-5 mr-2 cursor-pointer"> ${badge}</div>
                                 <span class="text-[10px] text-slate-300 font-mono">PMID: ${p.pmid}</span>
                             </div>
                             <div class="title-text">${p.title}</div>
                             <div class="author-info">👤 ${p.author}</div>
-                            <div class="aff-info">📍 ${p.aff.substring(0, 100)}...</div>
+                            <div class="aff-info">📍 ${p.aff.substring(0, 150)}...</div>
                             <div class="journal-info">📖 ${p.journal}</div>
-                            <div class="abstract-box">${p.abstract.substring(0, 400)}...</div>
+                            <div class="abstract-box">${p.abstract || "초록이 없습니다."}</div>
                             <div class="mt-4 text-right">
-                                <a href="${p.link}" target="_blank" class="text-blue-600 font-bold text-xs">원문 링크</a>
+                                <a href="${p.link}" target="_blank" class="text-blue-600 font-bold text-xs hover:underline">원문 링크 →</a>
                             </div>
                         </div>
                     `;
                 });
                 emailSec.classList.remove('hidden');
             } catch (e) {
-                alert("데이터 수집 중 오류가 발생했습니다.");
+                alert("PubMed API 통신 오류가 발생했습니다.");
+                console.error(e);
             } finally {
                 loader.classList.add('hidden');
             }
@@ -189,10 +310,10 @@
             
             let text = `[Primer 리포트 - ${new Date().toLocaleDateString()}]\n\n`;
             selected.forEach(p => {
-                text += `■ ${p.title}\n저자: ${p.author}\n링크: ${p.link}\n\n`;
+                text += `■ ${p.title}\n저자: ${p.author}\n저널: ${p.journal}\n링크: ${p.link}\n\n`;
             });
             
-            navigator.clipboard.writeText(text).then(() => alert("리포트 내용이 복사되었습니다. 메일에 붙여넣으세요!"));
+            navigator.clipboard.writeText(text).then(() => alert("리포트 내용이 복사되었습니다! 메일에 붙여넣으세요."));
         }
 
         function sendViaMailApp() {
