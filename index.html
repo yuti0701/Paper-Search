@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Primer - Bio Research Hub</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        
         .paper-card {
             background: white; border-radius: 12px; padding: 25px; border: 1px solid #e2e8f0;
             transition: all 0.3s ease; display: flex; flex-direction: column; min-height: 380px;
@@ -17,18 +15,12 @@
         .paper-card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
         .priority-card { border-top: 8px solid #ef4444; background-color: #fffcfc; }
         .normal-card { border-top: 8px solid #3b82f6; }
-        
         .title-text { font-size: 1.1rem; font-weight: 800; color: #1e293b; line-height: 1.4; margin-bottom: 12px; }
-        .author-info { font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px; }
-        .aff-info { font-size: 0.75rem; color: #64748b; line-height: 1.4; margin-bottom: 10px; }
-        .journal-info { font-size: 0.8rem; color: #2563eb; font-weight: 700; margin-bottom: 10px; }
-        
         .abstract-box {
             background: #f1f5f9; border-radius: 8px; padding: 12px;
             font-size: 0.85rem; color: #475569; line-height: 1.6;
             margin-top: auto; border: 1px solid #e2e8f0;
         }
-        
         .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: bold; margin-right: 5px; }
         .priority-badge { background: #fee2e2; color: #dc2626; }
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
@@ -39,7 +31,7 @@
 
     <div class="max-w-7xl mx-auto">
         <header class="mb-10 text-center">
-            <h1 class="text-5xl font-black text-slate-900 mb-2 italic">🧪 Primer</h1>
+            <h1 class="text-5xl font-black text-slate-900 mb-2 italic tracking-tighter">🧪 Primer</h1>
             <p class="text-slate-500 font-medium">Molecular Diagnostics Research Intelligence Hub</p>
         </header>
 
@@ -53,14 +45,8 @@
                         <input type="email" id="pubmed_email" value="your@lab.ac.kr" class="w-full mt-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase">시작</label>
-                            <input type="date" id="start_d" class="w-full mt-1 p-1 border rounded text-[10px]">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase">종료</label>
-                            <input type="date" id="end_d" class="w-full mt-1 p-1 border rounded text-[10px]">
-                        </div>
+                        <div><label class="block text-[10px] font-black text-slate-400 uppercase">시작</label><input type="date" id="start_d" class="w-full mt-1 p-1 border rounded text-[10px]"></div>
+                        <div><label class="block text-[10px] font-black text-slate-400 uppercase">종료</label><input type="date" id="end_d" class="w-full mt-1 p-1 border rounded text-[10px]"></div>
                     </div>
                     <div>
                         <label class="block text-[10px] font-black text-slate-400 uppercase">관심 키워드</label>
@@ -73,14 +59,22 @@
                     <button onclick="startResearch()" class="w-full bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-black transition-all">🚀 리포트 생성</button>
                 </div>
 
-                <!-- Email Section -->
+                <!-- 발송 섹션 고도화 -->
                 <div id="emailSection" class="hidden mt-10 pt-6 border-t-2 border-dashed border-slate-200">
-                    <h2 class="text-sm font-bold text-slate-800 mb-4 uppercase tracking-widest text-blue-600">✉️ 리포트 발송</h2>
-                    <div class="space-y-4">
-                        <input type="email" id="r_email" placeholder="수신자(교수님) 이메일" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                        <button onclick="sendViaMailApp()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 shadow-md">📧 메일 앱으로 보내기</button>
-                        <button onclick="copyToClipboard()" class="w-full bg-slate-100 text-slate-700 font-bold py-2 rounded-xl text-xs hover:bg-slate-200">📋 내용 전체 복사하기</button>
-                        <p class="text-[9px] text-slate-400 leading-tight">※ 메일 앱이 열리지 않을 경우 '내용 복사' 후 직접 메일에 붙여넣어 주세요.</p>
+                    <h2 class="text-sm font-bold text-slate-800 mb-4 uppercase tracking-widest text-blue-600">✉️ 리포트 전달</h2>
+                    <div class="space-y-3">
+                        <button onclick="copyAndNotify()" id="copyBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 shadow-md transition-all">
+                            📋 내용 복사 & 발송 준비
+                        </button>
+                        <div id="webmailButtons" class="hidden space-y-2">
+                            <p class="text-[10px] text-slate-500 font-medium text-center">복사되었습니다! 아래 메일을 열어 붙여넣으세요.</p>
+                            <button onclick="window.open('https://mail.google.com/mail/u/0/#inbox?compose=new')" class="w-full bg-white border border-slate-200 text-slate-700 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 flex items-center justify-center gap-2">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" width="14"> Gmail 열기
+                            </button>
+                            <button onclick="window.open('https://outlook.live.com/mail/0/deeplink/compose')" class="w-full bg-white border border-slate-200 text-slate-700 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 flex items-center justify-center gap-2">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/d/df/Microsoft_Office_Outlook_%282018%E2%80%93present%29.svg" width="14"> Outlook 열기
+                            </button>
+                        </div>
                     </div>
                 </div>
             </aside>
@@ -89,20 +83,17 @@
             <main class="lg:col-span-3">
                 <div id="loading" class="hidden flex flex-col justify-center items-center py-32">
                     <div class="loader"></div>
-                    <p class="mt-4 font-bold text-slate-400">NCBI 서버에서 데이터를 수집 중입니다...</p>
+                    <p class="mt-4 font-bold text-slate-400">데이터를 불러오는 중입니다...</p>
                 </div>
-
-                <div id="infoMessage" class="mb-6 p-4 bg-blue-50 text-blue-700 rounded-xl text-sm font-medium border border-blue-100">
-                    💡 <b>리포트 생성</b> 버튼을 눌러 연구 자료를 확인하세요.
+                <div id="infoMessage" class="mb-6 p-4 bg-blue-50 text-blue-700 rounded-xl text-sm font-medium border border-blue-100 italic text-center">
+                    연구 분야: Molecular Diagnostics 기반 최신 논문을 탐색합니다.
                 </div>
-
                 <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
             </main>
         </div>
     </div>
 
     <script>
-        // 날짜 초기값
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('end_d').value = today;
         const lastMonth = new Date(); lastMonth.setMonth(lastMonth.getMonth() - 1);
@@ -117,16 +108,17 @@
             const kw = document.getElementById('kw').value;
             const prio = document.getElementById('prio').value.toLowerCase();
 
-            if(!email.includes('@')) return alert("이메일을 정확히 입력하세요.");
+            if(!email.includes('@')) return alert("이메일을 입력하세요.");
 
             const grid = document.getElementById('resultsGrid');
             const loader = document.getElementById('loading');
-            const info = document.getElementById('infoMessage');
             const emailSec = document.getElementById('emailSection');
+            const webmailBtns = document.getElementById('webmailButtons');
 
             grid.innerHTML = "";
             loader.classList.remove('hidden');
             emailSec.classList.add('hidden');
+            webmailBtns.classList.add('hidden');
 
             try {
                 const query = `("Molecular Diagnostics") AND (${kw.split(',').join(' OR ')})`;
@@ -138,7 +130,7 @@
 
                 if (!ids || ids.length === 0) {
                     loader.classList.add('hidden');
-                    info.innerHTML = "❌ 검색 결과가 없습니다. 기간이나 키워드를 조정해 보세요.";
+                    alert("검색 결과가 없습니다.");
                     return;
                 }
 
@@ -154,13 +146,11 @@
                     const title = art.querySelector("ArticleTitle")?.textContent || "No Title";
                     const pmid = art.querySelector("PMID")?.textContent || "N/A";
                     const abstractFull = Array.from(art.querySelectorAll("AbstractText")).map(t => t.textContent).join(" ");
-                    
-                    // Abstract Truncate 로직 (300자)
                     const abstractDisplay = abstractFull.length > 300 ? abstractFull.substring(0, 300) + "..." : abstractFull;
 
                     const authorInfo = art.querySelector("Author");
                     const author = authorInfo ? `${authorInfo.querySelector("LastName")?.textContent} ${authorInfo.querySelector("ForeName")?.textContent}` : "Unknown";
-                    const aff = authorInfo?.querySelector("Affiliation")?.textContent || "소속 정보 없음";
+                    const aff = authorInfo?.querySelector("Affiliation")?.textContent || "N/A";
                     const journal = art.querySelector("Title")?.textContent || "Unknown Journal";
                     
                     const is_p = (title + abstractFull).toLowerCase().includes(prio);
@@ -179,55 +169,44 @@
                                 <span class="text-[9px] text-slate-300 font-mono italic">PMID: ${p.pmid}</span>
                             </div>
                             <div class="title-text">${p.title}</div>
-                            <div class="author-info">👤 ${p.author}</div>
-                            <div class="aff-info">📍 ${p.aff.substring(0, 120)}...</div>
-                            <div class="journal-info">📖 ${p.journal}</div>
+                            <div class="text-[0.8rem] font-bold text-slate-600">👤 ${p.author}</div>
+                            <div class="text-[0.7rem] text-slate-400 mb-2 truncate">📍 ${p.aff}</div>
+                            <div class="text-[0.75rem] font-bold text-blue-500 mb-4">📖 ${p.journal}</div>
                             <div class="abstract-box">${p.abstract}</div>
-                            <div class="mt-4 text-right">
-                                <a href="${p.link}" target="_blank" class="text-blue-500 font-bold text-xs hover:underline">원문 확인 →</a>
-                            </div>
+                            <div class="mt-4 text-right"><a href="${p.link}" target="_blank" class="text-slate-400 font-bold text-[10px] hover:text-blue-500 uppercase tracking-tighter">View Original →</a></div>
                         </div>
                     `;
                 });
-                info.innerHTML = "✅ 분석 완료! 메일로 보낼 논문을 선택해 주세요.";
                 emailSec.classList.remove('hidden');
             } catch (e) {
-                alert("PubMed 통신 오류가 발생했습니다.");
+                alert("통신 오류");
             } finally {
                 loader.classList.add('hidden');
             }
         }
 
-        function getSelectedText() {
+        function copyAndNotify() {
             const selectedPmids = Array.from(document.querySelectorAll('.paper-check:checked')).map(c => c.value);
             const selected = paperData.filter(p => selectedPmids.includes(p.pmid));
             
-            if(selected.length === 0) return null;
+            if(selected.length === 0) return alert("논문을 선택해 주세요.");
             
             let text = `[Primer 분자진단 최신 연구 리포트 - ${new Date().toLocaleDateString()}]\n\n`;
             selected.forEach(p => {
                 text += `■ ${p.title}\n저자: ${p.author}\n저널: ${p.journal}\n링크: ${p.link}\n요약: ${p.abstract}\n\n`;
             });
-            text += "--- Primer 리포트 시스템 제공 ---";
-            return text;
-        }
-
-        function copyToClipboard() {
-            const text = getSelectedText();
-            if(!text) return alert("논문을 최소 하나 이상 선택해 주세요.");
+            text += "--- 본 리포트는 Primer 시스템을 통해 수집되었습니다 ---";
             
-            navigator.clipboard.writeText(text).then(() => alert("리포트 내용이 복사되었습니다! 메일 본문에 붙여넣으세요."));
-        }
-
-        function sendViaMailApp() {
-            const r_email = document.getElementById('r_email').value;
-            const text = getSelectedText();
-            
-            if(!text) return alert("논문을 선택해 주세요.");
-            if(!r_email) return alert("수신자 이메일을 입력해 주세요.");
-
-            const subject = `[Primer Report] 최신 분자진단 연구 요약 리포트`;
-            window.location.href = `mailto:${r_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.innerText = "✅ 내용 복사 완료!";
+                btn.classList.replace('bg-blue-600', 'bg-green-600');
+                document.getElementById('webmailButtons').classList.remove('hidden');
+                setTimeout(() => {
+                    btn.innerText = "📋 내용 다시 복사하기";
+                    btn.classList.replace('bg-green-600', 'bg-blue-600');
+                }, 3000);
+            });
         }
     </script>
 </body>
